@@ -22,11 +22,15 @@
         (symbol-name id)))
       id))
 
-(defun ensure-keyword (kw)
-  "ensure that kw is a keyword"
-  (if (keywordp kw)
-      kw
-      (make-keyword kw)))
+(defun ensure-sxql-keyword (kw)
+  "ensure that kw is a sxql keyword"
+  (keyword-upcase
+   (if (keywordp kw)
+       (funcall (if *allow-dash-for-underscore*
+                    (curry #'substitute #\_ #\-)
+                    #'identity)
+                (symbol-name kw))
+       kw)))
 
 (defvar *schema* (ensure-identifier :public)
   "default database schema for build functions")
@@ -111,18 +115,18 @@ cols: list of the primary key columns as sxql keywords"
 schema: string or keyword representing schema
 table: string or keyword representing the table
 output-stream: pretty print in lower case to this stream. nil means no printing. "
-  (when-let* ((cols (db-table-columns schema table :transform #'keyword-upcase))
-              (pk-cols (db-primary-key-columns schema table :transform #'keyword-upcase)))
-    (funcall (if output-stream
-                 (lambda (x) (let ((*print-case* :downcase))
-                               (pprint x output-stream)
-                               x))
-                 #'identity)
-             (append (list 'select
-                           cols
-                           (list 'from (ensure-keyword table)))
-                     (when pk-cols
-                       (list (list 'where (build-pk-search-condition pk-cols))))))))
+  (when-let ((cols (db-table-columns schema table :transform #'keyword-upcase)))
+    (let ((pk-cols (db-primary-key-columns schema table :transform #'keyword-upcase)))
+     (funcall (if output-stream
+                  (lambda (x) (let ((*print-case* :downcase))
+                                (pprint x output-stream)
+                                x))
+                  #'identity)
+              (append (list 'select
+                            cols
+                            (list 'from (ensure-sxql-keyword table)))
+                      (when pk-cols
+                        (list (list 'where (build-pk-search-condition pk-cols)))))))))
 
 
-;;(connect-toplevel :postgres :database-name "dbtullius" :username "utullius" :password "Ulysses")
+

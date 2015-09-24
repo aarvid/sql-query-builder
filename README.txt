@@ -14,4 +14,7 @@ As it uses datafly, you will need to have datafly:*connection* assigned.
 If you are using caveman, you can uses (with-connection (db) ...).
 Or you can use the function datafly:connect-toplevel.
 
+See documentation strings.
+
+Also read demo.lisp for usage.
 
