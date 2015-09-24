@@ -1,7 +1,7 @@
-;;;; sxql-builder.asd
+;;;; sql-query-builder.asd
 
 (asdf:defsystem #:sql-query-builder
-  :description "Builds queries for sxql"
+  :description "Builds queries for sxql for developmental use"
   :author "andy peterson <andy.arvid@gmail.com>"
   :license "MIT"
   :depends-on (#:alexandria
