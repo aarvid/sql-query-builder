@@ -184,3 +184,25 @@ output-stream: pretty print in lower case to this stream. nil means no printing.
                (list 'delete-from
                      (ensure-sxql-keyword table)
                      (list 'where (build-pk-search-condition (or pk-cols cols))))))))
+
+
+(defun schema-code-completion (&key (schema *schema*)
+                                    (columns-p t)
+                                    (schema.table-p nil)
+                                    (table-dashes-p *allow-dash-for-underscore*))
+    "internalizes the table-names and possibly column-names of a schema to assist
+code completion. returns no value. 
+schema: string or keyword representing schema
+columns-p: boolean, makes keywords for all column names of each table.
+schema.table-p: boolean, for each table make an additional keyword for schema.
+table-dashes-p: boolean, for each table make an additional keyword with dashes instead of underscore."
+  (let ((sch (ensure-identifier schema)))
+    (dolist (tb (db-tables :schema schema))
+      (keyword-upcase tb)
+      (when schema.table-p
+        (keyword-upcase (concatenate 'string sch "." tb)))
+      (when table-dashes-p
+        (keyword-upcase (substitute #\- #\_ tb)))
+      (when columns-p
+        (db-table-columns schema tb :transform #'keyword-upcase))))
+  (values))

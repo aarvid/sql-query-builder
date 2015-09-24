@@ -5,9 +5,10 @@
   (:use #:cl #:alexandria #:datafly #:sxql )
   (:nicknames :sqb)
   (:export :build-select :build-update :build-insert :build-delete
-           :db-tables :db-primary-key
-           :db-primary-key-columns 
-           :db-table-columns :keyword-upcase :ensure-identifier
+           :db-tables :db-table-columns
+           :db-primary-key :db-primary-key-columns
+           :schema-code-completion
+           :keyword-upcase :ensure-identifier
            :*allow-dash-for-underscore*
            :*schema*))
 
