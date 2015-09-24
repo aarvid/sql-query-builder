@@ -11,9 +11,5 @@
   :components ((:file "package")
                (:file "sql-query-builder")))
 
-(defparameter *table-schema* "PUBLIC")
 
-(defun get-tables ()
-  (with-connection (db)
-    ))
 
