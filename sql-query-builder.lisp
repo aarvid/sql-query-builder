@@ -32,6 +32,12 @@
                 (symbol-name kw))
        kw)))
 
+(defun ensure-variable-symbol (kw)
+  "ensure that symbol kw is a local symbol with dashes instead of underscore.
+kw: symbol, keyword or string
+:my_column_name -> 'my-column-name "
+  (intern (substitute #\- #\_ (if (symbolp kw) (symbol-name kw) (string-upcase kw)))))
+
 (defvar *schema* (ensure-identifier :public)
   "default database schema for build functions")
 
@@ -94,98 +100,6 @@ transform: function of one string variable to transform column names.
                               (:= :constraint_name c-name)))
                  (order-by :ordinal_position)))))))
 
-(defun ensure-variable-symbol (kw)
-  "ensure that symbol kw is a local symbol with dashes instead of underscore.
-kw: symbol, keyword or string
-:my_column_name -> 'my-column-name "
-  (intern (substitute #\- #\_ (if (symbolp kw) (symbol-name kw) (string-upcase kw)))))
-
-(defun build-pk-search-condition (cols)
-  "returns a s-expression of the clauses of a search condition (where) by primary key.
-cols: list of the primary key columns as sxql keywords"
-  (let ((clauses (mapcar (lambda (c)
-                           (list := c (ensure-variable-symbol c )))
-                         cols)))
-    (if (sequence-of-length-p clauses 1)
-        (car clauses)
-        (cons :and clauses))))
-
-(defun build-set=-clause (cols)
-  "returns a s-expression of the set= for inserts and updates
-cols: list of the primary key columns as sxql keywords"
-  (cons 'set= (mapcan (lambda (c)
-                        (list c (ensure-variable-symbol c)))
-                      cols)))
-
-(defun build-select (table &key (schema *schema*) (output-stream *standard-output*))
-  "returns SxQL select s-expression
-schema: string or keyword representing schema
-table: string or keyword representing the table
-output-stream: pretty print in lower case to this stream. nil means no printing. "
-  (when-let ((cols (db-table-columns schema table :transform #'keyword-upcase)))
-    (let ((pk-cols (db-primary-key-columns schema table :transform #'keyword-upcase)))
-     (funcall (if output-stream
-                  (lambda (x) (let ((*print-case* :downcase))
-                                (pprint x output-stream)
-                                x))
-                  #'identity)
-              (append (list 'select
-                            cols
-                            (list 'from (ensure-sxql-keyword table)))
-                      (when pk-cols
-                        (list (list 'where (build-pk-search-condition pk-cols)))))))))
-
-
-(defun build-update (table &key (schema *schema*) (output-stream *standard-output*))
-  "returns SxQL update s-expression
-schema: string or keyword representing schema
-table: string or keyword representing the table
-output-stream: pretty print in lower case to this stream. nil means no printing. "
-  (when-let ((cols (db-table-columns schema table :transform #'keyword-upcase)))
-    (let ((pk-cols (db-primary-key-columns schema table :transform #'keyword-upcase)))
-      (funcall (if output-stream
-                   (lambda (x) (let ((*print-case* :downcase))
-                                 (pprint x output-stream)
-                                 x))
-                   #'identity)
-               (list 'update
-                     (ensure-sxql-keyword table)
-                     (build-set=-clause cols)
-                     (list 'where (build-pk-search-condition (or pk-cols cols))))))))
-
-(defun build-insert (table &key (schema *schema*) (output-stream *standard-output*))
-    "returns SxQL insert-into s-expression
-schema: string or keyword representing schema
-table: string or keyword representing the table
-output-stream: pretty print in lower case to this stream. nil means no printing. "
-  (when-let ((cols (db-table-columns schema table :transform #'keyword-upcase)))
-    (let ((pk-cols (db-primary-key-columns schema table :transform #'keyword-upcase)))
-     (funcall (if output-stream
-                  (lambda (x) (let ((*print-case* :downcase))
-                                (pprint x output-stream)
-                                x))
-                  #'identity)
-              (list 'insert-into
-                           (ensure-sxql-keyword table)
-                           (build-set=-clause cols))))))
-
-(defun build-delete (table &key (schema *schema*) (output-stream *standard-output*))
-  "returns SxQL delete-from s-expression
-schema: string or keyword representing schema
-table: string or keyword representing the table
-output-stream: pretty print in lower case to this stream. nil means no printing. "
-  (when-let ((cols (db-table-columns schema table :transform #'keyword-upcase)))
-    (let ((pk-cols (db-primary-key-columns schema table :transform #'keyword-upcase)))
-      (funcall (if output-stream
-                   (lambda (x) (let ((*print-case* :downcase))
-                                 (pprint x output-stream)
-                                 x))
-                   #'identity)
-               (list 'delete-from
-                     (ensure-sxql-keyword table)
-                     (list 'where (build-pk-search-condition (or pk-cols cols))))))))
-
-
 (defun schema-code-completion (&key (schema *schema*)
                                     (columns-p t)
                                     (schema.table-p nil)
@@ -206,3 +120,116 @@ table-dashes-p: boolean, for each table make an additional keyword with dashes i
       (when columns-p
         (db-table-columns schema tb :transform #'keyword-upcase))))
   (values))
+
+
+
+
+(defun build-pk-search-condition (cols)
+  "returns a s-expression of the clauses of a search condition (where) by primary key.
+cols: list of the primary key columns as sxql keywords"
+  (let ((clauses (mapcar (lambda (c)
+                           (list := c (ensure-variable-symbol c )))
+                         cols)))
+    (if (sequence-of-length-p clauses 1)
+        (car clauses)
+        (cons :and clauses))))
+
+(defun build-set=-clause (cols)
+  "returns a s-expression of the set= for inserts and updates
+cols: list of the primary key columns as sxql keywords"
+  (cons 'set= (mapcan (lambda (c)
+                        (list c (ensure-variable-symbol c)))
+                      cols)))
+
+
+(defun maybe-output-fn (output-stream)
+  (if output-stream
+      (lambda (x) (let ((*print-case* :downcase))
+                    (pprint x output-stream)
+                    x))
+      #'identity))
+
+
+(defun build-select (table &key (schema *schema*) (output-stream *standard-output*))
+  "returns SxQL select s-expression
+schema: string or keyword representing schema
+table: string or keyword representing the table
+output-stream: pretty print in lower case to this stream. nil means no printing. "
+  (when-let ((cols (db-table-columns schema table :transform #'keyword-upcase)))
+    (let ((pk-cols (db-primary-key-columns schema table :transform #'keyword-upcase)))
+     (funcall (maybe-output-fn output-stream)
+              (append (list 'select
+                            cols
+                            (list 'from (ensure-sxql-keyword table)))
+                      (when pk-cols
+                        (list (list 'where (build-pk-search-condition pk-cols)))))))))
+
+
+(defun build-update (table &key (schema *schema*) (output-stream *standard-output*))
+  "returns SxQL update s-expression
+schema: string or keyword representing schema
+table: string or keyword representing the table
+output-stream: pretty print in lower case to this stream. nil means no printing. "
+  (when-let ((cols (db-table-columns schema table :transform #'keyword-upcase)))
+    (let ((pk-cols (db-primary-key-columns schema table :transform #'keyword-upcase)))
+      (funcall (maybe-output-fn output-stream)
+               (list 'update
+                     (ensure-sxql-keyword table)
+                     (build-set=-clause cols)
+                     (list 'where (build-pk-search-condition (or pk-cols cols))))))))
+
+(defun build-insert (table &key (schema *schema*) (output-stream *standard-output*))
+    "returns SxQL insert-into s-expression
+schema: string or keyword representing schema
+table: string or keyword representing the table
+output-stream: pretty print in lower case to this stream. nil means no printing. "
+  (when-let ((cols (db-table-columns schema table :transform #'keyword-upcase)))
+    (let ((pk-cols (db-primary-key-columns schema table :transform #'keyword-upcase)))
+     (funcall (maybe-output-fn output-stream)
+              (list 'insert-into
+                           (ensure-sxql-keyword table)
+                           (build-set=-clause cols))))))
+
+(defun build-delete (table &key (schema *schema*) (output-stream *standard-output*))
+  "returns SxQL delete-from s-expression
+schema: string or keyword representing schema
+table: string or keyword representing the table
+output-stream: pretty print in lower case to this stream. nil means no printing. "
+  (when-let ((cols (db-table-columns schema table :transform #'keyword-upcase)))
+    (let ((pk-cols (db-primary-key-columns schema table :transform #'keyword-upcase)))
+      (funcall (maybe-output-fn output-stream)
+               (list 'delete-from
+                     (ensure-sxql-keyword table)
+                     (list 'where (build-pk-search-condition (or pk-cols cols))))))))
+
+
+
+
+
+(defun build-create (table &key (schema *schema*) (output-stream *standard-output*))
+  "returns SxQL create s-expression
+schema: string or keyword representing schema
+table: string or keyword representing the table
+output-stream: pretty print in lower case to this stream. nil means no printing. "
+  (when-let ((cols (db-table-columns schema table :transform #'keyword-upcase)))
+    (let ((pk-cols (db-primary-key-columns schema table :transform #'keyword-upcase)))
+      (funcall (maybe-output-fn output-stream)
+               (list 'create
+                     (ensure-sxql-keyword table)
+                     (list 'where (build-pk-search-condition (or pk-cols cols))))))))
+
+(defun build-selects (table &key (schema *schema*) (output-stream *standard-output*))
+  "returns SxQL select s-expression
+schema: string or keyword representing schema
+table: string or keyword representing the table or a list of them.
+output-stream: pretty print in lower case to this stream. nil means no printing. "
+  (let ((tables (ensure-list table)))
+    )
+  (when-let ((cols (db-table-columns schema table :transform #'keyword-upcase)))
+    (let ((pk-cols (db-primary-key-columns schema table :transform #'keyword-upcase)))
+     (funcall (maybe-output-fn output-stream)
+              (append (list 'select
+                            cols
+                            (list 'from (ensure-sxql-keyword table)))
+                      (when pk-cols
+                        (list (list 'where (build-pk-search-condition pk-cols)))))))))
