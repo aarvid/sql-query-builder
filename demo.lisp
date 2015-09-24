@@ -55,7 +55,6 @@
 ;;   (FROM :MY_CHILD_TABLE_TWO_PK)
 ;;   (WHERE (:= :ID ID)))
 
-;; => ; No value
 (execute
  (create-table :my_child_table_two_pk
      ((id :type 'integer)
@@ -63,6 +62,7 @@
       (id2-value :type 'integer))
    (primary-key '(:id :id2))
    (foreign-key '(:id) :references '(:my_table_one_pk :id))))
+;; => ; No value
 
 ;; use string for table name, specify schema, no pretty output.
 (build-select "my_child_table_two_pk" :schema :public :output-stream nil)
