@@ -72,3 +72,43 @@
 ;;   (FROM :MY_CHILD_TABLE_TWO_PK)
 ;;   (WHERE (:AND (:= :ID ID) (:= :ID2 ID2))))
 
+
+(build-update :my_child_table_two_pk )
+;; print output:
+;; (update :my_child_table_two_pk
+;;   (set= :id id :id2 id2 :id2-value id2-value)
+;;   (where (:and (:= :id id) (:= :id2 id2))))
+;; =>
+;; (UPDATE :MY_CHILD_TABLE_TWO_PK
+;;   (SET= :ID ID :ID2 ID2 :ID2-VALUE ID2-VALUE)
+;;   (WHERE (:AND (:= :ID ID) (:= :ID2 ID2))))
+
+
+(build-insert :my_child_table_two_pk)
+;; print output:
+;; (insert-into :my_child_table_two_pk
+;;   (set= :id id :id2 id2 :id2-value id2-value))
+;; =>
+;; (INSERT-INTO :MY_CHILD_TABLE_TWO_PK
+;;   (SET= :ID ID :ID2 ID2 :ID2-VALUE ID2-VALUE))
+
+(build-delete :my_child_table_two_pk )
+;; print output:
+;; (delete-from :my_child_table_two_pk
+;;   (where (:and (:= :id id) (:= :id2 id2))))
+;; =>
+;; (DELETE-FROM :MY_CHILD_TABLE_TWO_PK
+;;   (WHERE (:AND (:= :ID ID) (:= :ID2 ID2))))
+
+
+(build-delete :my_table_no_pk )
+;; print output:
+;; (delete-from :my_table_no_pk
+;;   (where
+;;    (:and (:= :first_integer first-integer)
+;;     (:= :second_integer second-integer))))
+;; =>
+;; (DELETE-FROM :MY_TABLE_NO_PK
+;;   (WHERE
+;;    (:AND (:= :FIRST_INTEGER FIRST-INTEGER)
+;;     (:= :SECOND_INTEGER SECOND-INTEGER))))
