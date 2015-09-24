@@ -122,7 +122,7 @@ output-stream: pretty print in lower case to this stream. nil means no printing.
                            cols
                            (list 'from (ensure-keyword table)))
                      (when pk-cols
-                       (list (list 'where (build-pk-where pk-cols))))))))
+                       (list (list 'where (build-pk-search-condition pk-cols))))))))
 
 
 ;;(connect-toplevel :postgres :database-name "dbtullius" :username "utullius" :password "Ulysses")
