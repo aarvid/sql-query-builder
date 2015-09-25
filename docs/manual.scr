@@ -1,0 +1,62 @@
+@begin(section)
+@title(Overview)
+
+This system is a tool to generate sql queries to be used in your common lisp code. Currently it targets SxQL and in fact uses the SxQL, datafly, cl-dbi stack of Fukamachi.  
+
+This code is not for production use.  That is, do not use it to programatically generate queries and execute them.  The objective of this library is to simply avoid typing.
+
+It should work with any ansi compliant database that has information_schema but has only been tested on postgresql.
+
+As it uses datafly, you will need to have @c(datafly:*connection*) assigned.
+
+If you are using caveman, you can uses @c((with-connection (db) ...)).
+
+Or you can use the function @c(datafly:connect-toplevel) for a persistent connection.
+
+Output works best when in a package that uses SxQL so SxQL symbols are printed without package name (i.e. select versus sxql:select)
+
+@end(section)
+
+@begin(section)
+@title(Query Building Functions)
+
+@cl:with-package[name="sql-query-builder"](
+@cl:doc(function build-select)
+@cl:doc(function build-insert)
+@cl:doc(function build-update)
+@cl:doc(function build-delete)
+)
+@end(section)
+
+
+@begin(section)
+@title(Database Information Functions)
+
+@cl:with-package[name="sql-query-builder"](
+@cl:doc(function db-tables)
+@cl:doc(function db-table-columns)
+@cl:doc(function db-primary-key)
+@cl:doc(function db-primary-key-columns)
+)
+@end(section)
+
+
+@begin(section)
+@title(Miscellaneous Functions)
+
+@cl:with-package[name="sql-query-builder"](
+@cl:doc(function schema-code-completion)
+@cl:doc(function keyword-upcase)
+@cl:doc(function ensure-identifier)
+)
+@end(section)
+
+@begin(section)
+@title(Global Variables)
+
+@cl:with-package[name="sql-query-builder"](
+@cl:doc(variable *allow-dash-for-underscore*)
+@cl:doc(variable *schema*)
+)
+@end(section)
+

@@ -17,7 +17,7 @@ Or you can use the function datafly:connect-toplevel for a persistent connection
 
 Output works best when in a package that uses SxQL so SxQL symbols are printed without package name (i.e. select versus sxql:select)
 
-See documentation strings.
+See documentation in the html directory.
 
 Also read demo.lisp for usage.
 

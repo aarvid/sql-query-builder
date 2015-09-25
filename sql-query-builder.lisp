@@ -3,7 +3,7 @@
 (in-package #:sql-query-builder)
 
 (defvar *allow-dash-for-underscore* t
-  "means :my-table-name is equivalent to :my_table_name. to ease code-completion")
+  "means @c(:my-table-name) is equivalent to @c(:my_table_name). to ease code-completion")
 
 (defun keyword-upcase (name)
   "make an upper case keyword from a string or another keyword"
@@ -12,7 +12,7 @@
   (make-keyword (string-upcase name)))
 
 (defun ensure-identifier (id)
-  "ensure id is a sql-identifier string"
+  "ensure @cl:param(id) is a sql-identifier string"
   (if (keywordp id)
       (string-downcase
        (funcall
@@ -23,7 +23,7 @@
       id))
 
 (defun ensure-sxql-keyword (kw)
-  "ensure that kw is a sxql keyword"
+  "ensure that @cl:param(kw) is a sxql keyword"
   (keyword-upcase
    (if (keywordp kw)
        (funcall (if *allow-dash-for-underscore*
@@ -33,7 +33,7 @@
        kw)))
 
 (defun ensure-variable-symbol (kw)
-  "ensure that symbol kw is a local symbol with dashes instead of underscore.
+  "ensure that symbol @cl:param(kw) is a local symbol with dashes instead of underscore.
 kw: symbol, keyword or string
 :my_column_name -> 'my-column-name "
   (intern (substitute #\- #\_ (if (symbolp kw) (symbol-name kw) (string-upcase kw)))))
@@ -43,9 +43,10 @@ kw: symbol, keyword or string
 
 (defun db-tables (&key (schema *schema*) (transform #'identity))
   "returns a list of table names of the schema.
-schema: string or keyword representing schema
-transform: function of one string variable to transform table names.
-           use #'keyword-upcase for keyword names"
+@p(@cl:param(schema): string or keyword representing schema)
+@p(@cl:param(transform): function of one string variable to transform table
+names. use #'keyword-upcase for keyword names) "
+  
   (mapcar transform
           (retrieve-all-values
            (select :table_name
@@ -54,10 +55,10 @@ transform: function of one string variable to transform table names.
 
 (defun db-table-columns (schema table &key (transform #'identity))
   "returns a list of column names of the table.
-schema: string or keyword representing schema
-table: string or keyword representing the table
-transform: function of one string variable to transform column names.
-           use #'keyword-upcase for keyword names"
+@p(@cl:param(schema): string or keyword representing schema)
+@p(@cl:param(table): string or keyword representing the table)
+@p(@cl:param(transform): function of one string variable to transform
+column names. use #'keyword-upcase for keyword names)"
   (mapcar transform
           (retrieve-all-values
            (select :column_name
@@ -68,10 +69,10 @@ transform: function of one string variable to transform column names.
 
 (defun db-primary-key (schema table &key (transform #'identity))
   "returns two values constaint-schema e constraint-name of the primary key.
-schema: string or keyword representing schema
-table: string or keyword representing the table
-transform: function of one string variable to transform the results.
-           use #'keyword-upcase for keyword names"
+@p(@cl:param(schema): string or keyword representing schema)
+@p(@cl:param(table): string or keyword representing the table)
+@p(@cl:param(transform): function of one string variable to transform
+the results. use #'keyword-upcase for keyword names)"
   (when-let ((pk
               (retrieve-one
                (select (:constraint_schema :constraint_name)
@@ -84,10 +85,10 @@ transform: function of one string variable to transform the results.
 
 (defun db-primary-key-columns (schema table &key (transform #'identity))
   "returns a list of column names of the primary key of the table.
-schema: string or keyword representing schema
-table: string or keyword representing the table
-transform: function of one string variable to transform column names.
-           use #'keyword-upcase for keyword names"
+@p(@cl:param(schema): string or keyword representing schema)
+@p(@cl:param(table): string or keyword representing the table)
+@p(@cl:param(transform): function of one string variable to transform
+column names. use #'keyword-upcase for keyword names)"
   (multiple-value-bind (c-schema c-name) (db-primary-key schema table)
     (when (and c-schema c-name)
       (mapcar transform
@@ -106,10 +107,10 @@ transform: function of one string variable to transform column names.
                                     (table-dashes-p *allow-dash-for-underscore*))
     "internalizes the table-names and possibly column-names of a schema to assist
 code completion. returns no value. 
-schema: string or keyword representing schema
-columns-p: boolean, makes keywords for all column names of each table.
-schema.table-p: boolean, for each table make an additional keyword for schema.
-table-dashes-p: boolean, for each table make an additional keyword with dashes instead of underscore."
+@p(@cl:param(schema): string or keyword representing schema)
+@p(@cl:param(columns-p): boolean, makes keywords for all column names of each table.)
+@p(@cl:param(schema.table-p): boolean, for each table make an additional keyword for schema.)
+@p(@cl:param(table-dashes-p): boolean, for each table make an additional keyword with dashes instead of underscore.)"
   (let ((sch (ensure-identifier schema)))
     (dolist (tb (db-tables :schema schema))
       (keyword-upcase tb)
@@ -143,6 +144,8 @@ cols: list of the primary key columns as sxql keywords"
 
 
 (defun maybe-output-fn (output-stream)
+  "returns a function of one variable that acts as the identity but will
+as a side affect pretty print to the output-stream if it is given"
   (if output-stream
       (lambda (x) (let ((*print-case* :downcase))
                     (pprint x output-stream)
@@ -152,9 +155,10 @@ cols: list of the primary key columns as sxql keywords"
 
 (defun build-select (table &key (schema *schema*) (output-stream *standard-output*))
   "returns SxQL select s-expression
-schema: string or keyword representing schema
-table: string or keyword representing the table
-output-stream: pretty print in lower case to this stream. nil means no printing. "
+@p(@cl:param(schema): string or keyword representing schema)
+@p(@cl:param(table): string or keyword representing the table)
+@p(@cl:param(output-stream): pretty print in lower case to this stream.
+nil means no printing.)"
   (when-let ((cols (db-table-columns schema table :transform #'keyword-upcase)))
     (let ((pk-cols (db-primary-key-columns schema table :transform #'keyword-upcase)))
      (funcall (maybe-output-fn output-stream)
@@ -167,9 +171,10 @@ output-stream: pretty print in lower case to this stream. nil means no printing.
 
 (defun build-update (table &key (schema *schema*) (output-stream *standard-output*))
   "returns SxQL update s-expression
-schema: string or keyword representing schema
-table: string or keyword representing the table
-output-stream: pretty print in lower case to this stream. nil means no printing. "
+@p(@cl:param(schema): string or keyword representing schema)
+@p(@cl:param(table): string or keyword representing the table)
+@p(@cl:param(output-stream): pretty print in lower case to this stream.
+nil means no printing.)"
   (when-let ((cols (db-table-columns schema table :transform #'keyword-upcase)))
     (let ((pk-cols (db-primary-key-columns schema table :transform #'keyword-upcase)))
       (funcall (maybe-output-fn output-stream)
@@ -180,9 +185,10 @@ output-stream: pretty print in lower case to this stream. nil means no printing.
 
 (defun build-insert (table &key (schema *schema*) (output-stream *standard-output*))
     "returns SxQL insert-into s-expression
-schema: string or keyword representing schema
-table: string or keyword representing the table
-output-stream: pretty print in lower case to this stream. nil means no printing. "
+@p(@cl:param(schema): string or keyword representing schema)
+@p(@cl:param(table): string or keyword representing the table)
+@p(@cl:param(output-stream): pretty print in lower case to this stream.
+nil means no printing.)"
   (when-let ((cols (db-table-columns schema table :transform #'keyword-upcase)))
     (let ((pk-cols (db-primary-key-columns schema table :transform #'keyword-upcase)))
      (funcall (maybe-output-fn output-stream)
@@ -192,9 +198,10 @@ output-stream: pretty print in lower case to this stream. nil means no printing.
 
 (defun build-delete (table &key (schema *schema*) (output-stream *standard-output*))
   "returns SxQL delete-from s-expression
-schema: string or keyword representing schema
-table: string or keyword representing the table
-output-stream: pretty print in lower case to this stream. nil means no printing. "
+@p(@cl:param(schema): string or keyword representing schema)
+@p(@cl:param(table): string or keyword representing the table)
+@p(@cl:param(output-stream): pretty print in lower case to this stream.
+nil means no printing.)"
   (when-let ((cols (db-table-columns schema table :transform #'keyword-upcase)))
     (let ((pk-cols (db-primary-key-columns schema table :transform #'keyword-upcase)))
       (funcall (maybe-output-fn output-stream)
@@ -208,9 +215,10 @@ output-stream: pretty print in lower case to this stream. nil means no printing.
 
 (defun build-create (table &key (schema *schema*) (output-stream *standard-output*))
   "returns SxQL create s-expression
-schema: string or keyword representing schema
-table: string or keyword representing the table
-output-stream: pretty print in lower case to this stream. nil means no printing. "
+@p(@cl:param(schema): string or keyword representing schema)
+@p(@cl:param(table): string or keyword representing the table)
+@p(@cl:param(output-stream): pretty print in lower case to this stream.
+nil means no printing.)"
   (when-let ((cols (db-table-columns schema table :transform #'keyword-upcase)))
     (let ((pk-cols (db-primary-key-columns schema table :transform #'keyword-upcase)))
       (funcall (maybe-output-fn output-stream)
@@ -220,9 +228,10 @@ output-stream: pretty print in lower case to this stream. nil means no printing.
 
 (defun build-selects (table &key (schema *schema*) (output-stream *standard-output*))
   "returns SxQL select s-expression
-schema: string or keyword representing schema
-table: string or keyword representing the table or a list of them.
-output-stream: pretty print in lower case to this stream. nil means no printing. "
+@p(@cl:param(schema): string or keyword representing schema)
+@p(@cl:param(table): string or keyword representing the table)
+@p(@cl:param(output-stream): pretty print in lower case to this stream.
+nil means no printing.)"
   (let ((tables (ensure-list table)))
     )
   (when-let ((cols (db-table-columns schema table :transform #'keyword-upcase)))
