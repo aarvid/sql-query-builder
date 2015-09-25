@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+  Miscellaneous Functions &ndash; SQL Query Builder
+</title>
+    <link rel="stylesheet" href="static/style.css"/>
+    
+  <link rel="stylesheet" href="static/highlight.css"/>
+  <script src="static/highlight.js"></script>
+  <style>
+   /* Highlight the current top-level TOC item, and hide the TOC of all other items */
+
+   .toc a[data-node="miscellaneous-functions"] {
+       color: #AD3108;
+   }
+
+   .toc ol {
+       display: none;
+   }
+
+   .toc > ol {
+       display: block;
+   }
+
+   .toc li a[data-node="miscellaneous-functions"] + ol {
+       display: block;
+   }
+
+   .toc li a[data-node="miscellaneous-functions"] + ol li {
+       font-size: 16px;
+       margin: 0 10px;
+   }
+
+   .toc li a[active] + ol li:first-child {
+       margin-top: 5px;
+   }
+  </style>
+
+  </head>
+  <body>
+    
+  <h1 class="doc-title">SQL Query Builder » Miscellaneous Functions</h1>
+  <article id="article" data-section="miscellaneous-functions">
+    <aside>
+      <ol class="toc"><li><a href="overview.html" data-node="overview">Overview</a></li><li><a href="query-building-functions.html" data-node="query-building-functions">Query Building Functions</a></li><li><a href="database-information-functions.html" data-node="database-information-functions">Database Information Functions</a></li><li><a href="miscellaneous-functions.html" data-node="miscellaneous-functions">Miscellaneous Functions</a></li><li><a href="global-variables.html" data-node="global-variables">Global Variables</a></li></ol>
+    </aside>
+    <main class="codex-section">
+      <p>
+<div class="codex-doc-node codex-operator codex-function"><code class="codex-name">schema-code-completion</code><code class="codex-lambda-list">(&amp;key (schema *schema*) (columns-p t) (schema.table-p nil) (table-dashes-p *allow-dash-for-underscore*))</code><div class="codex-docstring">internalizes the table-names and possibly column-names of a schema to assist
+code completion. returns no value. 
+<p><code class="codex-param">schema</code>: string or keyword representing schema</p>
+<p><code class="codex-param">columns-p</code>: boolean, makes keywords for all column names of each table.</p>
+<p><code class="codex-param">schema.table-p</code>: boolean, for each table make an additional keyword for schema.</p>
+<p><code class="codex-param">table-dashes-p</code>: boolean, for each table make an additional keyword with dashes instead of underscore.</p></div></div>
+<div class="codex-doc-node codex-operator codex-function"><code class="codex-name">keyword-upcase</code><code class="codex-lambda-list">(name)</code><div class="codex-docstring">make an upper case keyword from a string or another keyword</div></div>
+<div class="codex-doc-node codex-operator codex-function"><code class="codex-name">ensure-identifier</code><code class="codex-lambda-list">(id)</code><div class="codex-docstring">ensure <code class="codex-param">id</code> is a sql-identifier string</div></div>
+
+</p>
+    </main>
+  </article>
+  <footer>
+    <div class="info">
+      Created with <a href="https://github.com/CommonDoc/codex">Codex</a>.
+    </div>
+  </footer>
+  <script>
+   HighlightLisp.highlight_auto();
+  </script>
+
+  </body>
+</html>

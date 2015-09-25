@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+  Database Information Functions &ndash; SQL Query Builder
+</title>
+    <link rel="stylesheet" href="static/style.css"/>
+    
+  <link rel="stylesheet" href="static/highlight.css"/>
+  <script src="static/highlight.js"></script>
+  <style>
+   /* Highlight the current top-level TOC item, and hide the TOC of all other items */
+
+   .toc a[data-node="database-information-functions"] {
+       color: #AD3108;
+   }
+
+   .toc ol {
+       display: none;
+   }
+
+   .toc > ol {
+       display: block;
+   }
+
+   .toc li a[data-node="database-information-functions"] + ol {
+       display: block;
+   }
+
+   .toc li a[data-node="database-information-functions"] + ol li {
+       font-size: 16px;
+       margin: 0 10px;
+   }
+
+   .toc li a[active] + ol li:first-child {
+       margin-top: 5px;
+   }
+  </style>
+
+  </head>
+  <body>
+    
+  <h1 class="doc-title">SQL Query Builder » Database Information Functions</h1>
+  <article id="article" data-section="database-information-functions">
+    <aside>
+      <ol class="toc"><li><a href="overview.html" data-node="overview">Overview</a></li><li><a href="query-building-functions.html" data-node="query-building-functions">Query Building Functions</a></li><li><a href="database-information-functions.html" data-node="database-information-functions">Database Information Functions</a></li><li><a href="miscellaneous-functions.html" data-node="miscellaneous-functions">Miscellaneous Functions</a></li><li><a href="global-variables.html" data-node="global-variables">Global Variables</a></li></ol>
+    </aside>
+    <main class="codex-section">
+      <p>
+<div class="codex-doc-node codex-operator codex-function"><code class="codex-name">db-tables</code><code class="codex-lambda-list">(&amp;key (schema *schema*) (transform (function identity)))</code><div class="codex-docstring">returns a list of table names of the schema.
+<p><code class="codex-param">schema</code>: string or keyword representing schema</p>
+<p><code class="codex-param">transform</code>: function of one string variable to transform table
+names. use #'keyword-upcase for keyword names</p></div></div>
+<div class="codex-doc-node codex-operator codex-function"><code class="codex-name">db-table-columns</code><code class="codex-lambda-list">(schema table &amp;key (transform (function identity)))</code><div class="codex-docstring">returns a list of column names of the table.
+<p><code class="codex-param">schema</code>: string or keyword representing schema</p>
+<p><code class="codex-param">table</code>: string or keyword representing the table</p>
+<p><code class="codex-param">transform</code>: function of one string variable to transform
+column names. use #'keyword-upcase for keyword names</p></div></div>
+<div class="codex-doc-node codex-operator codex-function"><code class="codex-name">db-primary-key</code><code class="codex-lambda-list">(schema table &amp;key (transform (function identity)))</code><div class="codex-docstring">returns two values constaint-schema e constraint-name of the primary key.
+<p><code class="codex-param">schema</code>: string or keyword representing schema</p>
+<p><code class="codex-param">table</code>: string or keyword representing the table</p>
+<p><code class="codex-param">transform</code>: function of one string variable to transform
+the results. use #'keyword-upcase for keyword names</p></div></div>
+<div class="codex-doc-node codex-operator codex-function"><code class="codex-name">db-primary-key-columns</code><code class="codex-lambda-list">(schema table &amp;key (transform (function identity)))</code><div class="codex-docstring">returns a list of column names of the primary key of the table.
+<p><code class="codex-param">schema</code>: string or keyword representing schema</p>
+<p><code class="codex-param">table</code>: string or keyword representing the table</p>
+<p><code class="codex-param">transform</code>: function of one string variable to transform
+column names. use #'keyword-upcase for keyword names</p></div></div>
+
+</p>
+    </main>
+  </article>
+  <footer>
+    <div class="info">
+      Created with <a href="https://github.com/CommonDoc/codex">Codex</a>.
+    </div>
+  </footer>
+  <script>
+   HighlightLisp.highlight_auto();
+  </script>
+
+  </body>
+</html>
