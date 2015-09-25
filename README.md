@@ -23,7 +23,7 @@ Output works best when in a package that uses SxQL so SxQL symbols are printed w
 
 # Documentation
 
-See documentation in the html directory.
+See [documentation][docs] in the html directory.
 
 Also read demo.lisp for usage.
 
@@ -37,4 +37,5 @@ Licensed under the MIT License.
 [datafly]: https://github.com/fukamachi/datafly
 [cl-dbi]: http://8arrow.org/cl-dbi/
 [caveman]: http://8arrow.org/caveman/ 
+[docs]: https://aarvid.github.io/sql-query-builder/overview.html
 
