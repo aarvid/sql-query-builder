@@ -13,11 +13,11 @@ This code is not for production use.  That is, do not use it to programatically 
 
 It should work with any ansi compliant database that has information_schema but has only been tested on postgresql.
 
-As it uses datafly, you will need to have datafly:*connection* assigned.
+As it uses datafly, you will need to have `datafly:*connection*` assigned.
 
-If you are using [caveman][caveman], you can uses (with-connection (db) ...).
+If you are using [caveman][caveman], you can use `(with-connection (db) ...)`.
 
-Or you can use the function datafly:connect-toplevel for a persistent connection.
+Or you can use the function `datafly:connect-toplevel` for a persistent connection.
 
 Output works best when in a package that uses SxQL so SxQL symbols are printed without package name (i.e. select versus sxql:select)
 
