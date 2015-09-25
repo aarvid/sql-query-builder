@@ -226,13 +226,25 @@ nil means no printing.)"
                      (ensure-sxql-keyword table)
                      (list 'where (build-pk-search-condition (or pk-cols cols))))))))
 
+
+(defun db-table-info (schema table)
+  (let ((info (list :name (ensure-sxql-keyword table)
+                    :type nil
+                    :columns nil
+                    :primary-key nil
+                    :foreign-keys nil
+                    :unique nil
+                    :references nil
+                    )))
+    info))
+
 (defun build-selects (table &key (schema *schema*) (output-stream *standard-output*))
   "returns SxQL select s-expression
 @p(@cl:param(schema): string or keyword representing schema)
 @p(@cl:param(table): string or keyword representing the table)
 @p(@cl:param(output-stream): pretty print in lower case to this stream.
 nil means no printing.)"
-  (let ((tables (ensure-list table)))
+  (let ((tablist (ensure-list table)))
     )
   (when-let ((cols (db-table-columns schema table :transform #'keyword-upcase)))
     (let ((pk-cols (db-primary-key-columns schema table :transform #'keyword-upcase)))
@@ -242,3 +254,17 @@ nil means no printing.)"
                             (list 'from (ensure-sxql-keyword table)))
                       (when pk-cols
                         (list (list 'where (build-pk-search-condition pk-cols)))))))))
+
+
+(defun build-create (table &key (schema *schema*) (output-stream *standard-output*))
+  "returns SxQL create table s-expression based on how it is defined in the database.
+@p(@cl:param(schema): string or keyword representing schema)
+@p(@cl:param(table): string or keyword representing the table)
+@p(@cl:param(output-stream): pretty print in lower case to this stream.
+nil means no printing.)"
+  (when-let ((cols (db-table-columns schema table :transform #'keyword-upcase)))
+    (let ((pk-cols (db-primary-key-columns schema table :transform #'keyword-upcase)))
+     (funcall (maybe-output-fn output-stream)
+              (append (list 'create-table
+                            (ensure-sxql-keyword table)
+                            cols))))))
